@@ -121,6 +121,14 @@ code {
     z-index: 2;
 }
 
+.enemy {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: url("/images/enemy.png");
+    z-index: 3;
+}
+
 img {
     vertical-align: top;
 }

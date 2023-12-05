@@ -33,6 +33,18 @@
       "PackagePath": "staticwebassets\\icon-192.png"
     },
     {
+      "Id": "C:\\Users\\tilla\\Documents\\MIUN\\DT071G Programmering i C#.NET\\Projekt\\Projekt\\wwwroot\\images\\enemy.png",
+      "PackagePath": "staticwebassets\\images\\enemy.png"
+    },
+    {
+      "Id": "C:\\Users\\tilla\\Documents\\MIUN\\DT071G Programmering i C#.NET\\Projekt\\Projekt\\wwwroot\\images\\heart_empty.png",
+      "PackagePath": "staticwebassets\\images\\heart_empty.png"
+    },
+    {
+      "Id": "C:\\Users\\tilla\\Documents\\MIUN\\DT071G Programmering i C#.NET\\Projekt\\Projekt\\wwwroot\\images\\heart_full.png",
+      "PackagePath": "staticwebassets\\images\\heart_full.png"
+    },
+    {
       "Id": "C:\\Users\\tilla\\Documents\\MIUN\\DT071G Programmering i C#.NET\\Projekt\\Projekt\\wwwroot\\images\\platformLeftEnd.png",
       "PackagePath": "staticwebassets\\images\\platformLeftEnd.png"
     },

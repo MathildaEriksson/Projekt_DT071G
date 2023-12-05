@@ -1029,3 +1029,4 @@ C:\Users\tilla\Documents\MIUN\DT071G Programmering i C#.NET\Projekt\Projekt\obj\
 C:\Users\tilla\Documents\MIUN\DT071G Programmering i C#.NET\Projekt\Projekt\obj\Debug\net8.0\refint\Projekt.dll
 C:\Users\tilla\Documents\MIUN\DT071G Programmering i C#.NET\Projekt\Projekt\obj\Debug\net8.0\Projekt.pdb
 C:\Users\tilla\Documents\MIUN\DT071G Programmering i C#.NET\Projekt\Projekt\obj\Debug\net8.0\ref\Projekt.dll
+C:\Users\tilla\Documents\MIUN\DT071G Programmering i C#.NET\Projekt\Projekt\obj\Debug\net8.0\Projekt.sourcelink.json
