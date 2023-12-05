@@ -1,0 +1,168 @@
+﻿@page "/game"
+
+<PageTitle>Spel</PageTitle>
+
+<h1>Spel</h1>
+
+<div class="game-board" style="width:@(gameBoard.Width)px; height:@(gameBoard.Height)px;" tabindex="0"
+     @onkeydown="HandleKeyPress" @onkeyup="HandleKeyUp">
+
+     <div class="lives-container">
+        @for (int i = 0; i < player.Lives; i++)
+        {
+                <img src="images/heart_full.png" />
+        }
+        @for (int i = player.Lives; i < 3; i++)
+        {
+                <img src="images/heart_empty.png" />
+        }
+    </div>
+
+    <div class="player" style="left:@(player.X)px; top:@(player.Y)px;"></div>
+    @foreach (var platform in platforms)
+    {
+            <div class="platform" style="left:@(platform.X)px; top:@(platform.Y)px;">
+            <img src="images/platformLeftEnd.png" />
+            @for (int i = 0; i < platform.Width / 18 - 2; i++)
+            {
+                    <img src="images/platformMiddle.png" />
+            }
+            <img src="images/platformRightEnd.png" />
+        </div>
+    }
+</div>
+
+@code {
+
+    private Player player;
+    private GameBoard gameBoard;
+    private Timer gameLoopTimer;
+    int playerHeight = 26;
+    int playerWidth = 22;
+    private bool movingLeft = false;
+    private bool movingRight = false;
+    private bool jumping = false;
+    private List<Platform> platforms = new List<Platform>();
+
+    protected override void OnInitialized()
+    {
+        gameBoard = new GameBoard { Width = 800, Height = 600 };
+        player = new Player { X = 0, Y = 600 };
+        gameLoopTimer = new Timer(_ => GameLoop(), null, 0, 30);
+        platforms.Add(new Platform(200, 520, 72, 18));
+        platforms.Add(new Platform(300, 450, 90, 18));
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowLeft":
+                movingLeft = true;
+                break;
+            case "ArrowRight":
+                movingRight = true;
+                break;
+            case " ":
+                jumping = true;
+                break;
+        }
+    }
+
+    private void HandleKeyUp(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowLeft":
+                movingLeft = false;
+                break;
+            case "ArrowRight":
+                movingRight = false;
+                break;
+            case " ":
+                jumping = false;
+                break;
+        }
+    }
+
+    private void GameLoop()
+    {
+        int moveAmount = 5;
+        const int gravity = 2;
+        int groundLevel = gameBoard.Height - playerHeight;
+
+        if (movingLeft && player.X - moveAmount >= 0)
+        {
+            player.X -= moveAmount;
+            CheckIfPlayerIsOnGround();
+        }
+        if (movingRight && player.X + moveAmount + playerWidth <= gameBoard.Width)
+        {
+            player.X += moveAmount;
+            CheckIfPlayerIsOnGround();
+        }
+
+        player.PreviousY = player.Y;
+
+        if (!player.IsOnGround)
+        {
+            player.VerticalVelocity += gravity;
+            player.Y += player.VerticalVelocity;
+
+            foreach (var platform in platforms)
+            {
+                if (IsCollidingWithPlatform(player, platform))
+                {
+                    player.IsOnGround = true;
+                    player.VerticalVelocity = 0;
+                    player.Y = platform.Y - playerHeight; // Sätter spelaren på plattformen
+                    break;
+                }
+            }
+        }
+
+        if (player.Y >= groundLevel)
+        {
+            SetPlayerOnGround(groundLevel);
+        }
+
+        if (jumping && player.IsOnGround)
+        {
+            player.VerticalVelocity = -20;
+            player.IsOnGround = false;
+            jumping = false;
+        }       
+
+        StateHasChanged();
+    }
+
+    private bool IsCollidingWithPlatform(Player player, Platform platform)
+    {
+        bool isAbovePlatform = player.PreviousY + playerHeight <= platform.Y;
+        return player.X + playerWidth > platform.X && player.X < platform.X + platform.Width
+               && player.Y + playerHeight >= platform.Y && player.Y < platform.Y
+               && isAbovePlatform;
+    }
+
+    private void CheckIfPlayerIsOnGround()
+    {
+        bool onPlatform = platforms.Any(p => IsCollidingWithPlatform(player, p));
+        if (!onPlatform && player.Y < gameBoard.Height - playerHeight)
+        {
+            player.IsOnGround = false;
+        }
+    }
+
+    private void SetPlayerOnGround(int groundLevel)
+    {
+        player.IsOnGround = true;
+        player.VerticalVelocity = 0;
+        player.Y = groundLevel;
+    }
+
+    public void Dispose()
+    {
+        gameLoopTimer?.Dispose();
+    }
+
+}
