@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "ZOxEK05eQpFwYefNa/o6hTMFQUyS/8PCD0/mZ5RgLuc=",
+  "Hash": "IFpZu4EhiuqGN0wlUanG5Mp9nfO+cC74kCG5r/S5Pu8=",
   "Source": "Projekt",
   "BasePath": "/",
   "Mode": "Root",
@@ -8071,6 +8071,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\sample-data\\weather.json"
+    },
+    {
+      "Identity": "C:\\Users\\tilla\\Documents\\MIUN\\DT071G Programmering i C#.NET\\Projekt\\Projekt\\wwwroot\\sound\\theme.mp3",
+      "SourceId": "Projekt",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\tilla\\Documents\\MIUN\\DT071G Programmering i C#.NET\\Projekt\\Projekt\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "sound/theme.mp3",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\sound\\theme.mp3"
     }
   ]
 }

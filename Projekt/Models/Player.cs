@@ -7,8 +7,6 @@
         public int VerticalVelocity { get; set; }
         public bool IsOnGround { get; set; }
         public int PreviousY { get; set; }
-
-        public int Lives { get; set; } = 1;
-
+        public int Lives { get; set; } = 3;
     }
 }

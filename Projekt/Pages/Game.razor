@@ -1,8 +1,13 @@
 ﻿@page "/game"
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Spel</PageTitle>
 
 <h1>Spel</h1>
+<audio @ref="backgroundMusic" id="backgroundMusic" autoplay loop>
+    <source src="/sound/theme.mp3" type="audio/mpeg">
+    Din webbläsare stöder inte audio elementet.
+</audio>
 
 <div class="game-board" style="width:@(gameBoard.Width)px; height:@(gameBoard.Height)px;" tabindex="0"
      @onkeydown="HandleKeyPress" @onkeyup="HandleKeyUp">
@@ -17,6 +22,8 @@
                 <img src="images/heart_empty.png" />
         }
     </div>
+
+    <button @onclick="ToggleMusic" class="music-toggle">Toggle Music</button>
 
     <div class="enemy" style="left:@(enemy.X)px; top:@(enemy.Y)px; width:@(enemy.Width)px; height:@(enemy.Height)px;"></div>
 
@@ -46,6 +53,8 @@
     private bool movingRight = false;
     private bool jumping = false;
     private List<Platform> platforms = new List<Platform>();
+    private ElementReference backgroundMusic;
+    private bool isMusicPlaying = true;
 
     protected override void OnInitialized()
     {
@@ -187,6 +196,29 @@
         }
     }
 
+    private async Task PlayMusic()
+    {
+        await JSRuntime.InvokeVoidAsync("playAudio", backgroundMusic);
+    }
+
+    private async Task PauseMusic()
+    {
+        await JSRuntime.InvokeVoidAsync("pauseAudio", backgroundMusic);
+    }
+
+    private async Task ToggleMusic()
+    {
+        if (isMusicPlaying)
+        {
+            await PauseMusic();
+        }
+        else
+        {
+            await PlayMusic();
+        }
+
+        isMusicPlaying = !isMusicPlaying;
+    }
 
     public void Dispose()
     {
