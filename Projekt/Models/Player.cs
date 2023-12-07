@@ -12,6 +12,7 @@ namespace Projekt.Models
         public int Lives { get; set; } = 3;
         public int Height { get; } = 26;
         public int Width { get; } = 22;
+        public int CollectedDiamonds { get; private set; } = 0;
 
         public void MoveLeft(int moveAmount, int gameBoardWidth) { X = Math.Max(0, X - moveAmount); }
         public void MoveRight(int moveAmount, int gameBoardWidth) { X = Math.Min(gameBoardWidth - Width, X + moveAmount); }
@@ -46,7 +47,6 @@ namespace Projekt.Models
             }
         }
 
-
         public bool CheckCollisionWithPlatform(Platform platform)
         {
             bool isAbovePlatform = PreviousY + Height <= platform.Y;
@@ -65,6 +65,29 @@ namespace Projekt.Models
                 VerticalVelocity = 0;
                 Y = groundLevel;
             }
+        }
+
+        public void CollectDiamonds(List<Diamond> diamonds)
+        {
+            for (int i = diamonds.Count - 1; i >= 0; i--)
+            {
+                if (IsCollidingWithDiamond(diamonds[i]))
+                {
+                    diamonds.RemoveAt(i);
+                    CollectedDiamonds++;
+                }
+            }
+        }
+
+        private bool IsCollidingWithDiamond(Diamond diamond)
+        {
+            int diamondWidth = 18; 
+            int diamondHeight = 18; 
+
+            return X < diamond.X + diamondWidth &&
+                   X + Width > diamond.X &&
+                   Y < diamond.Y + diamondHeight &&
+                   Y + Height > diamond.Y;
         }
 
         public void CheckCollisionWithEnemy(Enemy enemy)
