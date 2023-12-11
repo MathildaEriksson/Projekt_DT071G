@@ -124,8 +124,15 @@
     private void GameLoop()
     {
         enemy.Move(gameBoard);
-        CheckCollisionWithEnemy();
-        
+
+        bool collisionDetected = player.CheckCollisionWithEnemy(enemy);
+        if (collisionDetected)
+        {
+            if (player.Lives <= 0)
+            {
+                // Hantera Game Over
+            }
+        }        
 
         player.PreviousY = player.Y;
 
@@ -149,25 +156,7 @@
         StateHasChanged();
     }
 
-    private void CheckCollisionWithEnemy()
-    {
-        if (player.X < enemy.X + enemy.Width &&
-            player.X + player.Width > enemy.X &&
-            player.Y < enemy.Y + enemy.Height &&
-            player.Y + player.Height > enemy.Y)
-        {
-            // Kollision detekterad
-            player.Lives--; // TODO Se till att inte mer än 1 liv tas vid en kollision 
-            if (player.Lives <= 0)
-            {
-                // Hantera Game Over
-            }
-            else
-            {
-                
-            }
-        }
-    }
+
 
     private async Task PlayMusic()
     {

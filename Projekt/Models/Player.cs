@@ -14,6 +14,9 @@ namespace Projekt.Models
         public int Width { get; } = 22;
         public int CollectedDiamonds { get; private set; } = 0;
 
+        private const int InvulnerabilityDuration = 1000;
+        private DateTime lastHitTime;
+
         public void MoveLeft(int moveAmount, int gameBoardWidth) { X = Math.Max(0, X - moveAmount); }
         public void MoveRight(int moveAmount, int gameBoardWidth) { X = Math.Min(gameBoardWidth - Width, X + moveAmount); }
         public void Jump() {
@@ -90,9 +93,21 @@ namespace Projekt.Models
                    Y + Height > diamond.Y;
         }
 
-        public void CheckCollisionWithEnemy(Enemy enemy)
+        public bool CheckCollisionWithEnemy(Enemy enemy)
         {
-            // Logik för kollision med fienden
+            if (DateTime.Now - lastHitTime > TimeSpan.FromMilliseconds(InvulnerabilityDuration))
+            {
+                if (X < enemy.X + enemy.Width &&
+                    X + Width > enemy.X &&
+                    Y < enemy.Y + enemy.Height &&
+                    Y + Height > enemy.Y)
+                {
+                    Lives--;
+                    lastHitTime = DateTime.Now;
+                    return true; // Kollision detekterad
+                }
+            }
+            return false;
         }
     }
 }
