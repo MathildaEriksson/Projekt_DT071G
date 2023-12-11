@@ -9,84 +9,102 @@
     Din webbläsare stöder inte audio elementet.
 </audio>
 
-<div class="game-board" style="width:@(gameBoard.Width)px; height:@(gameBoard.Height)px;" tabindex="0"
-     @onkeydown="HandleKeyPress" @onkeyup="HandleKeyUp">
+    <div class="game-board" style="width:@(gameBoard.Width)px; height:@(gameBoard.Height)px;" tabindex="0"
+         @onkeydown="HandleKeyPress" @onkeyup="HandleKeyUp">
 
-    <div class="top-bar">
-        <div class="lives-container">
-            @for (int i = 0; i < player.Lives; i++)
-            {
-                <img src="images/heart_full.png" />
-            }
-            @for (int i = player.Lives; i < 3; i++)
-            {
-                <img src="images/heart_empty.png" />
-            }
-        </div>
-        <div class="diamonds-container">
-            <img src="images/diamond.png" style="padding-right:5px"/>
-           @player.CollectedDiamonds / @totalDiamonds
-        </div>
-
-        <div id="music-checkbox">
-            <label for="music-toggle" class="label-text">Bakgrundsmusik</label>
-            <input type="checkbox" @onchange="ToggleMusic" checked="@isMusicPlaying" id="music-toggle" />
-        </div>
-
-     </div>
-
-    <div class="enemy" style="left:@(enemy.X)px; top:@(enemy.Y)px; width:@(enemy.Width)px; height:@(enemy.Height)px;"></div>
-
-    <div class="player" style="left:@(player.X)px; top:@(player.Y)px;"></div>
-
-    @foreach (var platform in platforms)
+    @if (currentState == GameState.StartMenu)
     {
+        <div class="menu-overlay">
+            <button @onclick="StartGame">Starta Spel</button>
+        </div>
+    }
+    else if (currentState == GameState.GameOver)
+    {
+        <div class="menu-overlay">
+            <p>Game Over</p>
+            <button @onclick="() => gameManager.RestartGame()">Spela Igen</button>
+        </div>    }
+
+        <div class="top-bar">
+            <div class="lives-container">
+                @for (int i = 0; i < player.Lives; i++)
+                {
+                    <img src="images/heart_full.png" />
+                }
+                @for (int i = player.Lives; i < 3; i++)
+                {
+                    <img src="images/heart_empty.png" />
+                }
+            </div>
+            <div class="diamonds-container">
+                <img src="images/diamond.png" style="padding-right:5px" />
+                @player.CollectedDiamonds / @totalDiamonds
+            </div>
+
+            <div id="music-checkbox">
+                <label for="music-toggle" class="label-text">Bakgrundsmusik</label>
+                <input type="checkbox" @onchange="ToggleMusic" checked="@isMusicPlaying" id="music-toggle" />
+            </div>
+
+        </div>
+
+         @foreach (var enemy in enemies)
+        {
+            <div class="enemy" style="left:@(enemy.X)px; top:@(enemy.Y)px; width:@(enemy.Width)px; height:@(enemy.Height)px;"></div>
+        }
+
+        <div class="player" style="left:@(player.X)px; top:@(player.Y)px;"></div>
+
+        @foreach (var platform in platforms)
+        {
             <div class="platform" style="left:@(platform.X)px; top:@(platform.Y)px;">
-            <img src="images/platformLeftEnd.png" />
-            @for (int i = 0; i < platform.Width / 18 - 2; i++)
-            {
-                <img src="images/platformMiddle.png" />
-            }
-            <img src="images/platformRightEnd.png" />
-        </div>
-    }
+                <img src="images/platformLeftEnd.png" />
+                @for (int i = 0; i < platform.Width / 18 - 2; i++)
+                {
+                    <img src="images/platformMiddle.png" />
+                }
+                <img src="images/platformRightEnd.png" />
+            </div>
+        }
 
-    @foreach (var diamond in diamonds)
-    {
-        <img src="/images/diamond.png" class="diamond" style="left:@(diamond.X)px; top:@(diamond.Y)px;" />
-    }
-</div>
+        @foreach (var diamond in diamonds)
+        {
+            <img src="/images/diamond.png" class="diamond" style="left:@(diamond.X)px; top:@(diamond.Y)px;" />
+        }
+    </div>
 
 @code {
-
     private Player player;
     private GameBoard gameBoard;
     private Timer gameLoopTimer;
-    private Enemy enemy;
     private bool movingLeft = false;
     private bool movingRight = false;
     private bool jumping = false;
     private List<Platform> platforms = new List<Platform>();
+    private List<Enemy> enemies = new List<Enemy>();
     private ElementReference backgroundMusic;
     private bool isMusicPlaying = true;
     private int groundLevel;
     private List<Diamond> diamonds = new List<Diamond>();
     private int totalDiamonds;
+    public enum GameState
+    {
+        StartMenu,
+        InGame,
+        GameOver
+    }
+    private GameState currentState = GameState.StartMenu;
+    private GameManager gameManager = new GameManager();
 
     protected override void OnInitialized()
     {
         gameBoard = new GameBoard { Width = 800, Height = 600 };
         player = new Player { X = 0, IsOnGround = true };
         player.Y = gameBoard.Height - player.Height;
-        gameLoopTimer = new Timer(_ => GameLoop(), null, 0, 30);
-        platforms.Add(new Platform(200, 520, 72, 18));
-        platforms.Add(new Platform(300, 450, 90, 18));
-        enemy = new Enemy(300, 380, 24, 24, 2);
         groundLevel = gameBoard.Height - player.Height;
-        diamonds.Add(new Diamond { X = 100, Y = 500 });
-        diamonds.Add(new Diamond { X = 200, Y = 450 });
-        diamonds.Add(new Diamond { X = 300, Y = 400 });
+        gameLoopTimer = new Timer(_ => GameLoop(), null, 0, 30);
         totalDiamonds = diamonds.Count;
+        gameManager.OnStateChanged = StateHasChanged;
     }
 
     private void HandleKeyPress(KeyboardEventArgs e)
@@ -121,18 +139,57 @@
         }
     }
 
+    private void StartGame()
+    {
+        gameManager.StartGame();
+        LoadLevel(gameManager.CurrentLevel);
+    }
+
+    private void LoadLevel(int levelNumber)
+    {
+        // Rensa nuvarande speldata
+        platforms.Clear();
+        diamonds.Clear();
+        enemies.Clear();
+
+        // Lägg till ny speldata baserat på level
+        var levelData = gameManager.GetLevelData(levelNumber);
+        platforms.AddRange(levelData.Platforms);
+        diamonds.AddRange(levelData.Diamonds);
+        enemies.AddRange(levelData.Enemies);
+
+        // Återställ spelaren
+        ResetPlayer();
+
+        // Uppdatera totala antalet diamanter
+        totalDiamonds = diamonds.Count;
+
+        currentState = GameState.InGame;
+    }
+
+    private void ResetPlayer()
+    {
+        // Återställ spelare till startpositionen
+        player = new Player { X = 0, Y = gameBoard.Height - player.Height, Lives = 3, IsOnGround = true };
+    }
+
     private void GameLoop()
     {
-        enemy.Move(gameBoard);
-
-        bool collisionDetected = player.CheckCollisionWithEnemy(enemy);
-        if (collisionDetected)
+        foreach (var enemy in enemies)
         {
-            if (player.Lives <= 0)
+            enemy.Move(gameBoard);
+
+            bool collisionDetected = player.CheckCollisionWithEnemy(enemy);
+            if (collisionDetected)
             {
-                // Hantera Game Over
+                if (player.Lives <= 0)
+                {
+                    // Hantera Game Over
+                    currentState = GameState.GameOver;
+                    break; // Bryt ut ur loopen om spelet är över
+                }
             }
-        }        
+        }
 
         player.PreviousY = player.Y;
 
@@ -142,21 +199,19 @@
 
 
         player.ApplyGravity(2, platforms, groundLevel);
-        player.CheckCollisionWithEnemy(enemy);
         player.CheckIfOnGround(platforms, groundLevel);
 
         if (jumping && player.IsOnGround) { player.Jump(); }
 
         if (player.CollectedDiamonds == totalDiamonds)
         {
-            // Alla diamanter har samlats in
+            // Alla diamanter har samlats in, banan klar
+            // TODO: Gå till nästa bana
         }
 
         player.CollectDiamonds(diamonds);
         StateHasChanged();
     }
-
-
 
     private async Task PlayMusic()
     {
@@ -186,5 +241,4 @@
     {
         gameLoopTimer?.Dispose();
     }
-
 }
