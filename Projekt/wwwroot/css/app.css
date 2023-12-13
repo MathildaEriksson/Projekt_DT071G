@@ -134,7 +134,7 @@ img {
 }
 
 .top-bar {
-    background-color: #FFCC00;
+    background-color: #ff93b0;
     padding: 10px;
     display: flex;
     flex-direction: row;
@@ -171,4 +171,22 @@ img {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 4;
+}
+
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #14114b;
+}
+
+.menu-container > button {
+    margin-top: 15px;
+    padding: 10px;
+    font-weight: 800;
+}
+
+.menu-container > p {
+   font-weight: 800;
 }

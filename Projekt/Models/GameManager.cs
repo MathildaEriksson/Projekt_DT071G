@@ -23,17 +23,6 @@ namespace Projekt.Models
             OnStateChanged?.Invoke();
         }
 
-        public void RestartGame()
-        {
-            CurrentState = GameState.InGame;
-            CurrentLevel = 1;
-            OnStateChanged?.Invoke();
-        }
-
-        public void LoadLevel(int levelNumber)
-        {
-            // Ladda level för givet levelnummer, ev kan denna tas bort nu
-        }
         public Level GetLevelData(int levelNumber)
         {
             if (levelNumber <= levels.Count)
@@ -42,15 +31,16 @@ namespace Projekt.Models
             }
             else
             {
-                // Hantera felaktigt levelnummer
-                return new Level();
+                // Returnera level 1 som backup
+                return levels[0];
             }
         }
 
-        public void NextLevel()
+        public int NextLevel()
         {
             CurrentLevel++;
             OnStateChanged?.Invoke();
+            return CurrentLevel;
         }
 
         public void GameOver()
@@ -58,7 +48,10 @@ namespace Projekt.Models
             CurrentState = GameState.GameOver;
             OnStateChanged?.Invoke();
         }
-
+        public bool IsLastLevel()
+        {
+            return CurrentLevel == levels.Count;
+        }
         private Level CreateLevel1()
         {
             var level = new Level();
@@ -69,7 +62,7 @@ namespace Projekt.Models
 
             // Lägg till fiender
             level.Enemies.Add(new Enemy(300, 380, 24, 24, 2));
-            level.Enemies.Add(new Enemy(300, 180, 24, 24, 2));
+            level.Enemies.Add(new Enemy(300, 180, 24, 24, 5));
 
             // Lägg till diamanter
             level.Diamonds.Add(new Diamond { X = 100, Y = 500 });
@@ -82,7 +75,16 @@ namespace Projekt.Models
         private Level CreateLevel2()
         {
             var level = new Level();
-            // Definiera plattformar, fiender och diamanter för level 2
+            // Lägg till plattformar
+            level.Platforms.Add(new Platform(200, 520, 72, 18));
+
+            // Lägg till fiender
+            level.Enemies.Add(new Enemy(300, 380, 24, 24, 2));
+
+            // Lägg till diamanter
+            level.Diamonds.Add(new Diamond { X = 100, Y = 500 });
+            level.Diamonds.Add(new Diamond { X = 200, Y = 450 });
+
             return level;
         }
     }

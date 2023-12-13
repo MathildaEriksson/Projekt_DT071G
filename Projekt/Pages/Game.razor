@@ -9,21 +9,47 @@
     Din webbläsare stöder inte audio elementet.
 </audio>
 
-    <div class="game-board" style="width:@(gameBoard.Width)px; height:@(gameBoard.Height)px;" tabindex="0"
+<div class="game-board" @ref="gameBoardRef" style="width:@(gameBoard.Width)px; height:@(gameBoard.Height)px;" tabindex="0"
          @onkeydown="HandleKeyPress" @onkeyup="HandleKeyUp">
 
     @if (currentState == GameState.StartMenu)
     {
         <div class="menu-overlay">
-            <button @onclick="StartGame">Starta Spel</button>
+            <div class="menu-container">
+                <img src="/images/logo.png" alt="Logga" />
+                <button class="btn btn-info" @onclick="StartGame">Starta spel</button>
+			</div>
+        </div>
+    }
+    else if (currentState == GameState.LevelCompleted)
+    {
+        <div class="menu-overlay">
+            <div class="menu-container">
+                <img src="/images/logo.png" alt="Logga" />
+                <p class="text-white m-0 p-0 pt-2 text-center">Banan klar!</p>
+                <button class="btn btn-info" @onclick="NextLevel">Nästa Bana</button>
+            </div>
         </div>
     }
     else if (currentState == GameState.GameOver)
     {
         <div class="menu-overlay">
-            <p>Game Over</p>
-            <button @onclick="() => gameManager.RestartGame()">Spela Igen</button>
-        </div>    }
+            <div class="menu-container">
+                <img src="/images/logo.png" alt="Logga" />
+                <p class="text-white m-0 p-0 pt-2 text-center">Game Over</p>
+                <button class="btn btn-info" @onclick="StartGame">Spela igen</button>
+            </div>
+        </div>  
+    } else if (currentState == GameState.GameCompleted)
+    {
+        <div class="menu-overlay">
+            <div class="menu-container">
+                <img src="/images/logo.png" alt="Logga" />
+                <p class="text-white m-0 p-0 pt-2 text-center">Grattis! Du har klarat spelet!</p>
+                <button class="btn btn-info" @onclick="StartGame">Spela igen</button>
+            </div>
+        </div>
+    }
 
         <div class="top-bar">
             <div class="lives-container">
@@ -77,24 +103,27 @@
     private Player player;
     private GameBoard gameBoard;
     private Timer gameLoopTimer;
+    private List<Platform> platforms = new List<Platform>();
+    private List<Enemy> enemies = new List<Enemy>();
+    private List<Diamond> diamonds = new List<Diamond>();
     private bool movingLeft = false;
     private bool movingRight = false;
     private bool jumping = false;
-    private List<Platform> platforms = new List<Platform>();
-    private List<Enemy> enemies = new List<Enemy>();
     private ElementReference backgroundMusic;
     private bool isMusicPlaying = true;
-    private int groundLevel;
-    private List<Diamond> diamonds = new List<Diamond>();
+    private int groundLevel;    
     private int totalDiamonds;
     public enum GameState
     {
         StartMenu,
         InGame,
-        GameOver
+        LevelCompleted,
+        GameOver, 
+        GameCompleted
     }
     private GameState currentState = GameState.StartMenu;
     private GameManager gameManager = new GameManager();
+    private ElementReference gameBoardRef;
 
     protected override void OnInitialized()
     {
@@ -102,7 +131,6 @@
         player = new Player { X = 0, IsOnGround = true };
         player.Y = gameBoard.Height - player.Height;
         groundLevel = gameBoard.Height - player.Height;
-        gameLoopTimer = new Timer(_ => GameLoop(), null, 0, 30);
         totalDiamonds = diamonds.Count;
         gameManager.OnStateChanged = StateHasChanged;
     }
@@ -139,27 +167,30 @@
         }
     }
 
-    private void StartGame()
+    private async Task StartGame()
     {
         gameManager.StartGame();
         LoadLevel(gameManager.CurrentLevel);
+        // Fokusera spelplanen
+        await JSRuntime.InvokeVoidAsync("focusElement", gameBoardRef);
     }
 
     private void LoadLevel(int levelNumber)
     {
+        startGameLoopTimer();
         // Rensa nuvarande speldata
         platforms.Clear();
         diamonds.Clear();
         enemies.Clear();
 
+        // Återställ spelaren
+        ResetPlayer();        
+
         // Lägg till ny speldata baserat på level
         var levelData = gameManager.GetLevelData(levelNumber);
         platforms.AddRange(levelData.Platforms);
         diamonds.AddRange(levelData.Diamonds);
-        enemies.AddRange(levelData.Enemies);
-
-        // Återställ spelaren
-        ResetPlayer();
+        enemies.AddRange(levelData.Enemies);        
 
         // Uppdatera totala antalet diamanter
         totalDiamonds = diamonds.Count;
@@ -173,6 +204,18 @@
         player = new Player { X = 0, Y = gameBoard.Height - player.Height, Lives = 3, IsOnGround = true };
     }
 
+    private void startGameLoopTimer()
+    {
+        gameLoopTimer = new Timer(_ => GameLoop(), null, 0, 30);
+    }
+
+    private async Task NextLevel()
+    {
+        LoadLevel(gameManager.NextLevel());
+        // Fokusera spelplanen
+        await JSRuntime.InvokeVoidAsync("focusElement", gameBoardRef);
+    }
+
     private void GameLoop()
     {
         foreach (var enemy in enemies)
@@ -184,8 +227,9 @@
             {
                 if (player.Lives <= 0)
                 {
-                    // Hantera Game Over
+                    // Game Over
                     currentState = GameState.GameOver;
+                    Dispose();
                     break; // Bryt ut ur loopen om spelet är över
                 }
             }
@@ -203,12 +247,24 @@
 
         if (jumping && player.IsOnGround) { player.Jump(); }
 
-        if (player.CollectedDiamonds == totalDiamonds)
+        if ((player.CollectedDiamonds == totalDiamonds) && totalDiamonds > 0)
         {
             // Alla diamanter har samlats in, banan klar
-            // TODO: Gå till nästa bana
+            currentState = GameState.LevelCompleted;
+            Dispose();
+            
+            if (gameManager.IsLastLevel())
+            {
+                // Alla banor avklarade
+                currentState = GameState.GameCompleted;
+            }
+            else
+            {
+                // Gå till nästa bana
+                currentState = GameState.LevelCompleted;
+            }
+            
         }
-
         player.CollectDiamonds(diamonds);
         StateHasChanged();
     }
