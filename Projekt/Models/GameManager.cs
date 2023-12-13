@@ -1,4 +1,6 @@
-﻿using static Projekt.Pages.Game;
+﻿//Mathilda Eriksson, DT071G, HT23
+using static Projekt.Models.Enemy;
+using static Projekt.Pages.Game;
 
 namespace Projekt.Models
 {
@@ -61,8 +63,8 @@ namespace Projekt.Models
             level.Platforms.Add(new Platform(300, 450, 90, 18));
 
             // Lägg till fiender
-            level.Enemies.Add(new Enemy(300, 380, 24, 24, 2));
-            level.Enemies.Add(new Enemy(300, 180, 24, 24, 5));
+            level.Enemies.Add(new Enemy(300, 380, 24, 24, 2, EnemyDirection.Horizontal));
+            level.Enemies.Add(new Enemy(300, 180, 24, 24, 5, EnemyDirection.Vertical));
 
             // Lägg till diamanter
             level.Diamonds.Add(new Diamond { X = 100, Y = 500 });
@@ -79,7 +81,7 @@ namespace Projekt.Models
             level.Platforms.Add(new Platform(200, 520, 72, 18));
 
             // Lägg till fiender
-            level.Enemies.Add(new Enemy(300, 380, 24, 24, 2));
+            level.Enemies.Add(new Enemy(300, 380, 24, 24, 2, EnemyDirection.Horizontal));
 
             // Lägg till diamanter
             level.Diamonds.Add(new Diamond { X = 100, Y = 500 });
