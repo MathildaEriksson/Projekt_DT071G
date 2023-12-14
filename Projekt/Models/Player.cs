@@ -14,12 +14,16 @@ namespace Projekt.Models
         public int CollectedDiamonds { get; private set; } = 0;
         private const int InvulnerabilityDuration = 1000;
         private DateTime lastHitTime;
+        public bool IsBlinking { get; private set; }
+        public DateTime BlinkStartTime { get; private set; }
+        private const int BlinkDuration = 1000;
 
         public void MoveLeft(int moveAmount, int gameBoardWidth) { X = Math.Max(0, X - moveAmount); }
         public void MoveRight(int moveAmount, int gameBoardWidth) { X = Math.Min(gameBoardWidth - Width, X + moveAmount); }
-        public void Jump() {
-               VerticalVelocity = -20; // Ett negativt värde för att hoppa uppåt
-               IsOnGround = false;
+        public void Jump()
+        {
+            VerticalVelocity = -20; // Ett negativt värde för att hoppa uppåt
+            IsOnGround = false;
         }
 
         // Tillämpar gravitation på spelaren
@@ -49,7 +53,7 @@ namespace Projekt.Models
                     VerticalVelocity = 0; // Nollställer vertikal hastighet vid kollision
                     Y = platform.Y - Height; // Justerar Y-positionen så att spelaren är på plattformen
                     IsOnGround = true;
-                    break; 
+                    break;
                 }
             }
         }
@@ -92,8 +96,8 @@ namespace Projekt.Models
 
         private bool IsCollidingWithDiamond(Diamond diamond)
         {
-            int diamondWidth = 18; 
-            int diamondHeight = 18; 
+            int diamondWidth = 18;
+            int diamondHeight = 18;
 
             return X < diamond.X + diamondWidth &&
                    X + Width > diamond.X &&
@@ -113,10 +117,26 @@ namespace Projekt.Models
                 {
                     Lives--;
                     lastHitTime = DateTime.Now;
+                    StartBlinking();
                     return true; // Kollision detekterad
                 }
             }
             return false;
+        }
+
+        //Blinkande spelare när den precis förlorat ett liv och är immun
+        private void StartBlinking()
+        {
+            IsBlinking = true;
+            BlinkStartTime = DateTime.Now;
+        }
+
+        public void UpdateBlinking()
+        {
+            if (IsBlinking && (DateTime.Now - BlinkStartTime).TotalMilliseconds > BlinkDuration)
+            {
+                IsBlinking = false;
+            }
         }
     }
 }

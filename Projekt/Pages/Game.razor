@@ -5,7 +5,7 @@
 
 <PageTitle>Spel</PageTitle>
 
-<h1>Spel</h1>
+<h1>DreamyPixel Quest</h1>
 <!-- Bakgrundsmusik -->
 <audio @ref="backgroundMusic" id="backgroundMusic" autoplay loop>
     <source src="/sound/theme.mp3" type="audio/mpeg">
@@ -59,7 +59,7 @@
             <div class="menu-container">
                 <img src="/images/logo.png" alt="Logga" />
                 <p class="text-white m-0 p-0 pt-2 text-center">Banan klar!</p>
-                <button class="btn btn-info" @onclick="NextLevel">Nästa Bana</button>
+                <button class="btn btn-info" @onclick="NextLevel">Nästa bana</button>
             </div>
         </div>
     }
@@ -86,7 +86,7 @@
     }
 
     <!-- Rendera spelaren, fiender, plattformar och diamanter -->
-    <div class="player" style="left:@(player.X)px; top:@(player.Y)px;"></div>
+    <div class="player @GetPlayerCssClass()" style="left:@(player.X)px; top:@(player.Y)px;"></div>
 
          @foreach (var enemy in enemies)
         {
@@ -263,6 +263,9 @@
             }
         }
 
+        // Spelaren blinkar om den precis förlorat ett liv och är immun
+        player.UpdateBlinking();
+
         // Uppdaterar spelarens tidigare Y-position för kollisionsdetektering
         player.PreviousY = player.Y;
 
@@ -301,6 +304,12 @@
 
         // Uppdaterar komponenten för att reflektera eventuella ändringar
         StateHasChanged();
+    }
+
+    //Uppdaterar spelarens CSS vid blinkning vid immunitet
+    private string GetPlayerCssClass()
+    {
+        return player.IsBlinking ? "player blinking" : "player";
     }
 
     // Spelar musik
