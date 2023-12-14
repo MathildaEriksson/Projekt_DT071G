@@ -18,7 +18,7 @@ namespace Projekt.Models
         public DateTime BlinkStartTime { get; private set; }
         private const int BlinkDuration = 1000;
 
-        public void MoveLeft(int moveAmount, int gameBoardWidth) { X = Math.Max(0, X - moveAmount); }
+        public void MoveLeft(int moveAmount) { X = Math.Max(0, X - moveAmount); }
         public void MoveRight(int moveAmount, int gameBoardWidth) { X = Math.Min(gameBoardWidth - Width, X + moveAmount); }
         public void Jump()
         {

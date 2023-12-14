@@ -270,7 +270,7 @@
         player.PreviousY = player.Y;
 
         // Hantera spelarrörelse och kollision
-        if (movingLeft) { player.MoveLeft(5, gameBoard.Width); }
+        if (movingLeft) { player.MoveLeft(5); }
         if (movingRight) { player.MoveRight(5, gameBoard.Width); }
 
         // Tillämpar gravitation på spelaren och kontrollerar kollision med plattformar
